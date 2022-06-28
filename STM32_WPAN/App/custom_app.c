@@ -51,6 +51,10 @@ typedef struct
 /* Private defines ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
+//UART Message Buffer:
+char NOTIFY_MSG[35] = {'\0'};
+
+
 /* USER CODE END PD */
 
 /* Private macros -------------------------------------------------------------*/
@@ -85,9 +89,15 @@ static void Custom_Mycharnotify_Send_Notification(void);
 /* USER CODE BEGIN PFP */
 	void myTask(void)
 	{
+
+		sprintf(NOTIFY_MSG, "Button Pressed!\r\n");
+
 		//Read the Button State
 		if(!HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin))
 		{
+
+			UART_Transmit((uint8_t*)NOTIFY_MSG, strlen(NOTIFY_MSG));
+
 			UpdateCharData[0] ^= 0x1;
 			Custom_Mycharnotify_Update_Char();		//Depends on Characteristic long name from CubeMX
 		}
