@@ -203,7 +203,6 @@ static SVCCTL_EvtAckStatus_t Custom_STM_Event_Handler(void *Event)
             uint8_t x = attribute_modified->Attr_Data[0];
             sprintf(BLE_MSG, "Write Value: %x\r\n", x);
             UART_Transmit((uint8_t*)BLE_MSG, strlen(BLE_MSG));
-            //HAL_UART_Transmit(&UartHandle, (uint8_t*)BLE_MSG, strlen(BLE_MSG), HAL_MAX_DELAY);
 
 
 			if (attribute_modified->Attr_Data[0] == 0x22)

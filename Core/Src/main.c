@@ -121,11 +121,11 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 
   sprintf(MSG, "Initializing... \r\n");
-  HAL_UART_Transmit(&huart1, (uint8_t*)MSG, strlen(MSG), HAL_MAX_DELAY);
+  UART_Transmit((uint8_t*)MSG, strlen(MSG));
+  //HAL_UART_Transmit(&huart1, (uint8_t*)MSG, strlen(MSG), HAL_MAX_DELAY);
 
   while (1)
   {
-
 
 	  /* USER CODE END WHILE */
     MX_APPE_Process();
