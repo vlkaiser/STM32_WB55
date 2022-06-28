@@ -50,6 +50,9 @@ typedef struct{
 
 /* USER CODE BEGIN PD */
 
+//UART Message Buffer:
+char BLE_MSG[35] = {'\0'};
+
 /* USER CODE END PD */
 
 /* Private macros ------------------------------------------------------------*/
@@ -72,6 +75,9 @@ PLACE_IN_SECTION("BLE_DRIVER_CONTEXT") static CustomContext_t CustomContext;
  */
 
 /* USER CODE BEGIN PV */
+
+// Import huart from main.c
+UART_HandleTypeDef UartHandle;
 
 /* USER CODE END PV */
 
@@ -193,6 +199,13 @@ static SVCCTL_EvtAckStatus_t Custom_STM_Event_Handler(void *Event)
             /* USER CODE BEGIN CUSTOM_STM_Service_1_Char_1_ACI_GATT_ATTRIBUTE_MODIFIED_VSEVT_CODE */
 
             //Check the Write Attribute sent, and compare it to a fixed value to decide what to do:
+
+            uint8_t x = attribute_modified->Attr_Data[0];
+            sprintf(BLE_MSG, "Write Value: %x\r\n", x);
+            UART_Transmit((uint8_t*)BLE_MSG, strlen(BLE_MSG));
+            //HAL_UART_Transmit(&UartHandle, (uint8_t*)BLE_MSG, strlen(BLE_MSG), HAL_MAX_DELAY);
+
+
 			if (attribute_modified->Attr_Data[0] == 0x22)
 			{
 				HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);

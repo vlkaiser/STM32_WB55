@@ -56,6 +56,7 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
+int UART_Transmit(uint8_t* data, uint16_t size);
 
 /* USER CODE END EFP */
 

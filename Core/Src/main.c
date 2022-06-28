@@ -47,6 +47,9 @@ UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
 
+	//Make huart1 available elsewhere
+	//extern UART_HandleTypeDef UartHandle;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -396,6 +399,16 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+int UART_Transmit(uint8_t* data, uint16_t size){
+	  HAL_StatusTypeDef status = HAL_UART_Transmit(&huart1, data, size, 0xffff);
+
+    if (status != HAL_OK) {
+        //while (1);
+        return 0;
+    }
+    return 1;
+}
 
 /* USER CODE END 4 */
 
