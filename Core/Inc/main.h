@@ -57,6 +57,9 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 int UART_Transmit(uint8_t* data, uint16_t size);
+void OLED_Transmit_Line1(uint8_t* data);
+void OLED_Transmit_Line2(uint8_t* data);
+void OLED_Transmit_Line3(uint8_t* data);
 
 /* USER CODE END EFP */
 

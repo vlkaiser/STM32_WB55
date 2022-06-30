@@ -98,6 +98,8 @@ static void Custom_Mycharnotify_Send_Notification(void);
 
 			UART_Transmit((uint8_t*)NOTIFY_MSG, strlen(NOTIFY_MSG));
 
+			OLED_Transmit_Line2((uint8_t*)NOTIFY_MSG);
+
 			UpdateCharData[0] ^= 0x1;
 			Custom_Mycharnotify_Update_Char();		//Depends on Characteristic long name from CubeMX
 		}

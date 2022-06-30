@@ -90,37 +90,8 @@ static void MX_I2C1_Init(void);
 
 void drawLogo() {
 
-		drawBitmap(7, 20, (uint8_t *)JaktoolLogoBMP, JaktoolLogoWidth, JaktoolLogoHeight, White, Black);
-
-		HAL_Delay(150);
-
-
-		//Just screwing around....
-		clearScreen(Black);
-		ssd1306_UpdateScreen();
-
-		writeLargeFont(0, 2, White, "OLED");
-		writeMedFont(75, 2, White, "Pgm");
-		writeSmFont(0, 30, White, "Initializing...");
-		writeTinyFont(50, 45, White, " /_(-_~)_/ ");
-
-		HAL_Delay(150);
-
-
-		// with the ssd lib
-		ssd1306_Fill(White);
-		ssd1306_UpdateScreen();
-
-		ssd1306_SetCursor(10, 2);
-		ssd1306_WriteString("OLED", Font_16x26, Black);
-		ssd1306_SetCursor(85, 2);
-		ssd1306_WriteString("Pgm", Font_11x18, Black);
-		ssd1306_SetCursor(10, 30);
-		ssd1306_WriteString("Initializing...", Font_7x10, Black);
-		ssd1306_SetCursor(40, 45);
-		ssd1306_WriteString(" /_(-_~)_/ ", Font_6x8, Black);
-
-		ssd1306_UpdateScreen();
+	drawBitmap(7, 20, (uint8_t *)JaktoolLogoBMP, JaktoolLogoWidth, JaktoolLogoHeight, White, Black);
+	HAL_Delay(150);
 
 }
 
@@ -182,18 +153,19 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
+  drawLogo();
+  HAL_Delay(150);
+
   sprintf(MSG, "Initializing... \r\n");
   UART_Transmit((uint8_t*)MSG, strlen(MSG));
-  //HAL_UART_Transmit(&huart1, (uint8_t*)MSG, strlen(MSG), HAL_MAX_DELAY);
 
-  drawLogo();
+  clearScreen(Black);
+  OLED_Transmit_Line1((uint8_t*)MSG);
 
   while (1)
   {
 
     /* USER CODE END WHILE */
-		//drawLogo();
-
     MX_APPE_Process();
 
     /* USER CODE BEGIN 3 */
@@ -230,7 +202,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.MSIState = RCC_MSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.MSICalibrationValue = RCC_MSICALIBRATION_DEFAULT;
-  RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_8;
+  RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_10;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
@@ -513,7 +485,15 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+/******************************************************************************************************
+* @fn					- UART_Transmit
+* @brief				- Write to UART
+* @param[in]			- data: Message : char MSG[35] = {'\0'};
+* 						- size: sizeof Message : strlen(MSG)
+* @return				- 0 if success, 1 if fail
+*
+* @note					- Simplifies Write to UART from anywhere that inherits main.h
+******************************************************************************************************/
 int UART_Transmit(uint8_t* data, uint16_t size){
 	  HAL_StatusTypeDef status = HAL_UART_Transmit(&huart1, data, size, 0xffff);
 
@@ -522,6 +502,48 @@ int UART_Transmit(uint8_t* data, uint16_t size){
         return 0;
     }
     return 1;
+}
+
+/******************************************************************************************************
+* @fn					- OLED_Transmit_Line1
+* @brief				- Write to OLED on Line 1
+* @param[in]			- data: Message : char MSG[35] = {'\0'};
+* @return				- void
+*
+* @note					- Simplifies Write to OLED from anywhere that inherits main.h
+******************************************************************************************************/
+void OLED_Transmit_Line1(uint8_t* data){
+
+	writeSmFont(0, 2, White, data);
+
+}
+
+/******************************************************************************************************
+* @fn					- OLED_Transmit_Line2
+* @brief				- Write to OLED on Line 2
+* @param[in]			- data: Message : char MSG[35] = {'\0'};
+* @return				- void
+*
+* @note					- Simplifies Write to OLED from anywhere that inherits main.h
+******************************************************************************************************/
+void OLED_Transmit_Line2(uint8_t* data){
+
+	writeSmFont(0, 26, White, data);
+
+}
+
+/******************************************************************************************************
+* @fn					- OLED_Transmit_Line3
+* @brief				- Write to OLED on Line 3
+* @param[in]			- data: Message : char MSG[35] = {'\0'};
+* @return				- void
+*
+* @note					- Simplifies Write to OLED from anywhere that inherits main.h
+******************************************************************************************************/
+void OLED_Transmit_Line3(uint8_t* data){
+
+	writeSmFont(0, 50, White, data);
+
 }
 
 /* USER CODE END 4 */
