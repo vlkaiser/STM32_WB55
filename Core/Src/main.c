@@ -21,6 +21,11 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "ssd1306.h"
+#include "ssd1306_tests.h"
+#include <stdbool.h>
+#include <BitmapLibrary.h>
+#include "OLED.h"
 
 /* USER CODE END Includes */
 
@@ -39,7 +44,9 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
- IPCC_HandleTypeDef hipcc;
+ I2C_HandleTypeDef hi2c1;
+
+IPCC_HandleTypeDef hipcc;
 
 RTC_HandleTypeDef hrtc;
 
@@ -60,12 +67,62 @@ static void MX_IPCC_Init(void);
 static void MX_RF_Init(void);
 static void MX_RTC_Init(void);
 static void MX_USART1_UART_Init(void);
+static void MX_I2C1_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+/******************************************************************************************************
+* @fn					- drawLogo
+* @brief				- Display startup graphics on OLED display
+* @param[in]			- void
+* @return				- void
+*
+* @note					- PB8 (Clock) is CN5-10 (D15)
+* 						- PB9 (Data) is CN5-9 (D14)
+* 						- Power is +3.3V
+* 						- Remember to init ssd1306_Init();
+* 						- I2C Config - Pull-up, Max output speed = HIGH
+* 						- I2C Clock: PCLK1
+******************************************************************************************************/
+
+void drawLogo() {
+
+		drawBitmap(7, 20, (uint8_t *)JaktoolLogoBMP, JaktoolLogoWidth, JaktoolLogoHeight, White, Black);
+
+		HAL_Delay(150);
+
+
+		//Just screwing around....
+		clearScreen(Black);
+		ssd1306_UpdateScreen();
+
+		writeLargeFont(0, 2, White, "OLED");
+		writeMedFont(75, 2, White, "Pgm");
+		writeSmFont(0, 30, White, "Initializing...");
+		writeTinyFont(50, 45, White, " /_(-_~)_/ ");
+
+		HAL_Delay(150);
+
+
+		// with the ssd lib
+		ssd1306_Fill(White);
+		ssd1306_UpdateScreen();
+
+		ssd1306_SetCursor(10, 2);
+		ssd1306_WriteString("OLED", Font_16x26, Black);
+		ssd1306_SetCursor(85, 2);
+		ssd1306_WriteString("Pgm", Font_11x18, Black);
+		ssd1306_SetCursor(10, 30);
+		ssd1306_WriteString("Initializing...", Font_7x10, Black);
+		ssd1306_SetCursor(40, 45);
+		ssd1306_WriteString(" /_(-_~)_/ ", Font_6x8, Black);
+
+		ssd1306_UpdateScreen();
+
+}
 
 /* USER CODE END 0 */
 
@@ -76,6 +133,7 @@ static void MX_USART1_UART_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+
 	//UART Message Buffer:
 	char MSG[35] = {'\0'};
 
@@ -110,7 +168,11 @@ int main(void)
   MX_RF_Init();
   MX_RTC_Init();
   MX_USART1_UART_Init();
+  MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
+
+  // Initialize OLED
+  ssd1306_Init();
 
   /* USER CODE END 2 */
 
@@ -124,10 +186,14 @@ int main(void)
   UART_Transmit((uint8_t*)MSG, strlen(MSG));
   //HAL_UART_Transmit(&huart1, (uint8_t*)MSG, strlen(MSG), HAL_MAX_DELAY);
 
+  drawLogo();
+
   while (1)
   {
 
-	  /* USER CODE END WHILE */
+    /* USER CODE END WHILE */
+		//drawLogo();
+
     MX_APPE_Process();
 
     /* USER CODE BEGIN 3 */
@@ -164,7 +230,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.MSIState = RCC_MSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.MSICalibrationValue = RCC_MSICALIBRATION_DEFAULT;
-  RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_10;
+  RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_8;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
@@ -177,7 +243,7 @@ void SystemClock_Config(void)
                               |RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_MSI;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV2;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.AHBCLK2Divider = RCC_SYSCLK_DIV1;
@@ -211,6 +277,54 @@ void PeriphCommonClock_Config(void)
   /* USER CODE BEGIN Smps */
 
   /* USER CODE END Smps */
+}
+
+/**
+  * @brief I2C1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_I2C1_Init(void)
+{
+
+  /* USER CODE BEGIN I2C1_Init 0 */
+
+  /* USER CODE END I2C1_Init 0 */
+
+  /* USER CODE BEGIN I2C1_Init 1 */
+
+  /* USER CODE END I2C1_Init 1 */
+  hi2c1.Instance = I2C1;
+  hi2c1.Init.Timing = 0x00303D5B;
+  hi2c1.Init.OwnAddress1 = 0;
+  hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c1.Init.OwnAddress2 = 0;
+  hi2c1.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
+  hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure Analogue filter
+  */
+  if (HAL_I2CEx_ConfigAnalogFilter(&hi2c1, I2C_ANALOGFILTER_ENABLE) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure Digital filter
+  */
+  if (HAL_I2CEx_ConfigDigitalFilter(&hi2c1, 0) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN I2C1_Init 2 */
+
+  /* USER CODE END I2C1_Init 2 */
+
 }
 
 /**

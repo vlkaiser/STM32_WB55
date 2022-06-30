@@ -1,0 +1,2 @@
+../Core/Src/BitmapLibrary.c:18:6:ssd1306_drawLightningArrow	32	static
+../Core/Src/BitmapLibrary.c:54:6:drawBitmap	40	static

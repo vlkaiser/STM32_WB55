@@ -1,0 +1,5 @@
+../Core/Src/OLED.c:30:6:writeLargeFont	24	static
+../Core/Src/OLED.c:50:6:writeMedFont	24	static
+../Core/Src/OLED.c:70:6:writeSmFont	24	static
+../Core/Src/OLED.c:90:6:writeTinyFont	24	static
+../Core/Src/OLED.c:99:6:clearScreen	16	static
