@@ -236,6 +236,9 @@ void SystemInit(void)
 
 #if defined(STM32WB55xx) || defined(STM32WB5Mxx)
   /* Reset PLLSAI1CFGR register */
+
+
+
   RCC->PLLSAI1CFGR = 0x22041000U;
 #endif
   

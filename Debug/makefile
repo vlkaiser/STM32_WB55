@@ -71,7 +71,7 @@ main-build: BLE_WB55_vid12_FromScratch.elf secondary-outputs
 
 # Tool invocations
 BLE_WB55_vid12_FromScratch.elf BLE_WB55_vid12_FromScratch.map: $(OBJS) $(USER_OBJS) C:\Users\vkaiser\Documents\_LocalRepo\_STM32\STM32WB_Bluetooth_Tutorials\_DEMOS\BLE_WB55_vid12_FromScratch\STM32WB55RGVX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "BLE_WB55_vid12_FromScratch.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\vkaiser\Documents\_LocalRepo\_STM32\STM32WB_Bluetooth_Tutorials\_DEMOS\BLE_WB55_vid12_FromScratch\STM32WB55RGVX_FLASH.ld" --specs=nosys.specs -Wl,-Map="BLE_WB55_vid12_FromScratch.map" -Wl,--gc-sections -static -L"C:\Users\vkaiser\Documents\_LocalRepo\_STM32\_Libraries\stm32-ssd1306\ssd1306" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+	arm-none-eabi-gcc -o "BLE_WB55_vid12_FromScratch.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\vkaiser\Documents\_LocalRepo\_STM32\STM32WB_Bluetooth_Tutorials\_DEMOS\BLE_WB55_vid12_FromScratch\STM32WB55RGVX_FLASH.ld" --specs=nosys.specs -Wl,-Map="BLE_WB55_vid12_FromScratch.map" -Wl,--gc-sections -static -L"C:\Users\vkaiser\Documents\_LocalRepo\_STM32\_Libraries\stm32-ssd1306\ssd1306" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

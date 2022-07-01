@@ -44,7 +44,9 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
- I2C_HandleTypeDef hi2c1;
+ ADC_HandleTypeDef hadc1;
+
+I2C_HandleTypeDef hi2c1;
 
 IPCC_HandleTypeDef hipcc;
 
@@ -68,6 +70,7 @@ static void MX_RF_Init(void);
 static void MX_RTC_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_I2C1_Init(void);
+static void MX_ADC1_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -108,6 +111,9 @@ int main(void)
 	//UART Message Buffer:
 	char MSG[35] = {'\0'};
 
+	// Temp Sensor Buffer:
+	float ADC_TEMP_F = 0.0;
+
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -140,6 +146,7 @@ int main(void)
   MX_RTC_Init();
   MX_USART1_UART_Init();
   MX_I2C1_Init();
+  MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
 
   // Initialize OLED
@@ -153,14 +160,22 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
+  //Output to Display
   drawLogo();
   HAL_Delay(150);
 
+  //Output to UART and Display
   sprintf(MSG, "Initializing... \r\n");
   UART_Transmit((uint8_t*)MSG, strlen(MSG));
-
   clearScreen(Black);
   OLED_Transmit_Line1((uint8_t*)MSG);
+
+  //Read ADC, print to 2 decimal places
+	ADC_TEMP_F = Get_ADC_Temp();
+	sprintf(MSG, "Temp: %0.2f deg F\r\n", ADC_TEMP_F);
+	UART_Transmit((uint8_t*)MSG, strlen(MSG));
+	OLED_Transmit_Line2((uint8_t*)MSG);
+
 
   while (1)
   {
@@ -249,6 +264,64 @@ void PeriphCommonClock_Config(void)
   /* USER CODE BEGIN Smps */
 
   /* USER CODE END Smps */
+}
+
+/**
+  * @brief ADC1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_ADC1_Init(void)
+{
+
+  /* USER CODE BEGIN ADC1_Init 0 */
+
+  /* USER CODE END ADC1_Init 0 */
+
+  ADC_ChannelConfTypeDef sConfig = {0};
+
+  /* USER CODE BEGIN ADC1_Init 1 */
+
+  /* USER CODE END ADC1_Init 1 */
+
+  /** Common config
+  */
+  hadc1.Instance = ADC1;
+  hadc1.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
+  hadc1.Init.Resolution = ADC_RESOLUTION_12B;
+  hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+  hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
+  hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+  hadc1.Init.LowPowerAutoWait = DISABLE;
+  hadc1.Init.ContinuousConvMode = DISABLE;
+  hadc1.Init.NbrOfConversion = 1;
+  hadc1.Init.DiscontinuousConvMode = DISABLE;
+  hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+  hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+  hadc1.Init.DMAContinuousRequests = DISABLE;
+  hadc1.Init.Overrun = ADC_OVR_DATA_PRESERVED;
+  hadc1.Init.OversamplingMode = DISABLE;
+  if (HAL_ADC_Init(&hadc1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure Regular Channel
+  */
+  sConfig.Channel = ADC_CHANNEL_1;
+  sConfig.Rank = ADC_REGULAR_RANK_1;
+  sConfig.SamplingTime = ADC_SAMPLETIME_2CYCLES_5;
+  sConfig.SingleDiff = ADC_SINGLE_ENDED;
+  sConfig.OffsetNumber = ADC_OFFSET_NONE;
+  sConfig.Offset = 0;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN ADC1_Init 2 */
+
+  /* USER CODE END ADC1_Init 2 */
+
 }
 
 /**
@@ -453,7 +526,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, LD2_Pin|LD3_Pin|LD1_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, LD2_Pin|LD3_Pin|GPIO_PIN_4|LDExt_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : B1_Pin */
   GPIO_InitStruct.Pin = B1_Pin;
@@ -461,8 +534,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LD2_Pin LD3_Pin LD1_Pin */
-  GPIO_InitStruct.Pin = LD2_Pin|LD3_Pin|LD1_Pin;
+  /*Configure GPIO pins : LD2_Pin LD3_Pin PB4 */
+  GPIO_InitStruct.Pin = LD2_Pin|LD3_Pin|GPIO_PIN_4;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -482,9 +555,49 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : LDExt_Pin */
+  GPIO_InitStruct.Pin = LDExt_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(LDExt_GPIO_Port, &GPIO_InitStruct);
+
 }
 
 /* USER CODE BEGIN 4 */
+
+/******************************************************************************************************
+* @fn					- Get_ADC_Temp
+* @brief				- Get and Convert ADC Temperature
+* @param[in]			- N/A
+* @return				- Temperature def F
+*
+* @note					-
+******************************************************************************************************/
+float Get_ADC_Temp()
+{
+	// Temp Sensor Buffer:
+	uint16_t ADC_VAL = 0;
+	float ADC_Temp = 0.0;
+
+	HAL_ADC_Start(&hadc1);
+	HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
+	ADC_VAL = HAL_ADC_GetValue(&hadc1);
+
+	HAL_ADC_Stop(&hadc1);
+
+	//Divide by Scaling Factor to get Voltage
+	ADC_Temp = ADC_VAL / ADC_SCALING_FACTOR;
+
+	//Convert to deg C
+	ADC_Temp = ((ADC_Temp - 1.8663)/(-0.01169));
+
+	ADC_Temp = ((ADC_Temp * (9.0 / 5.0)) + 32.0);
+
+	return ADC_Temp;
+
+}
+
 /******************************************************************************************************
 * @fn					- UART_Transmit
 * @brief				- Write to UART
@@ -495,12 +608,17 @@ static void MX_GPIO_Init(void)
 * @note					- Simplifies Write to UART from anywhere that inherits main.h
 ******************************************************************************************************/
 int UART_Transmit(uint8_t* data, uint16_t size){
+
+	HAL_GPIO_WritePin(LDExt_GPIO_Port, LDExt_Pin, GPIO_PIN_SET);
+
 	  HAL_StatusTypeDef status = HAL_UART_Transmit(&huart1, data, size, 0xffff);
 
     if (status != HAL_OK) {
         //while (1);
         return 0;
     }
+
+    HAL_GPIO_WritePin(LDExt_GPIO_Port, LDExt_Pin, GPIO_PIN_RESET);
     return 1;
 }
 

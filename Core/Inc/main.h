@@ -56,6 +56,7 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
+float Get_ADC_Temp();
 int UART_Transmit(uint8_t* data, uint16_t size);
 void OLED_Transmit_Line1(uint8_t* data);
 void OLED_Transmit_Line2(uint8_t* data);
@@ -64,6 +65,8 @@ void OLED_Transmit_Line3(uint8_t* data);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define T1_Pin GPIO_PIN_0
+#define T1_GPIO_Port GPIOC
 #define B1_Pin GPIO_PIN_4
 #define B1_GPIO_Port GPIOC
 #define LD2_Pin GPIO_PIN_0
@@ -80,13 +83,17 @@ void OLED_Transmit_Line3(uint8_t* data);
 #define B3_GPIO_Port GPIOD
 #define JTDO_Pin GPIO_PIN_3
 #define JTDO_GPIO_Port GPIOB
-#define LD1_Pin GPIO_PIN_5
-#define LD1_GPIO_Port GPIOB
+#define LDExt_Pin GPIO_PIN_5
+#define LDExt_GPIO_Port GPIOB
 #define STLINK_RX_Pin GPIO_PIN_6
 #define STLINK_RX_GPIO_Port GPIOB
 #define STLINK_TX_Pin GPIO_PIN_7
 #define STLINK_TX_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
+
+// Enabled VRefInt Channel = 3.6V in CubeMX
+//12bit ADC = 4095 / 3.6VRef
+#define ADC_SCALING_FACTOR	1137.5
 
 /* USER CODE END Private defines */
 
