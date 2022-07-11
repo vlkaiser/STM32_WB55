@@ -26,6 +26,7 @@
 #include <stdbool.h>
 #include <BitmapLibrary.h>
 #include "OLED.h"
+#include "STLM20W87F_TempSense.h"
 
 /* USER CODE END Includes */
 
@@ -44,7 +45,7 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
- ADC_HandleTypeDef hadc1;
+ADC_HandleTypeDef hadc1;
 
 I2C_HandleTypeDef hi2c1;
 
@@ -566,37 +567,7 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-/******************************************************************************************************
-* @fn					- Get_ADC_Temp
-* @brief				- Get and Convert ADC Temperature
-* @param[in]			- N/A
-* @return				- Temperature def F
-*
-* @note					-
-******************************************************************************************************/
-float Get_ADC_Temp()
-{
-	// Temp Sensor Buffer:
-	uint16_t ADC_VAL = 0;
-	float ADC_Temp = 0.0;
 
-	HAL_ADC_Start(&hadc1);
-	HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
-	ADC_VAL = HAL_ADC_GetValue(&hadc1);
-
-	HAL_ADC_Stop(&hadc1);
-
-	//Divide by Scaling Factor to get Voltage
-	ADC_Temp = ADC_VAL / ADC_SCALING_FACTOR;
-
-	//Convert to deg C
-	ADC_Temp = ((ADC_Temp - 1.8663)/(-0.01169));
-
-	ADC_Temp = ((ADC_Temp * (9.0 / 5.0)) + 32.0);
-
-	return ADC_Temp;
-
-}
 
 /******************************************************************************************************
 * @fn					- UART_Transmit
